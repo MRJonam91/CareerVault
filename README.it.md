@@ -93,7 +93,19 @@ careervault export career.json --lang en --format md -o dist/cv-en.md
 careervault export career.json --format json-resume -o dist/resume.json
 ```
 
-### 4. `careervault stats <file> [--json]`
+### 4. `careervault diff <old.json> <new.json> [--json]`
+Confronta due ledger di carriera evidenziando le differenze (ruoli aggiunti/rimossi, date modificate, metriche, competenze):
+```bash
+careervault diff career-2024.json career-2026.json
+```
+
+### 5. `careervault import <resume.json> [-o <career.json>]`
+Importa e converte un curriculum in formato [JSON Resume](https://jsonresume.org) nello schema CareerVault:
+```bash
+careervault import resume.json -o career.json
+```
+
+### 6. `careervault stats <file> [--json]`
 Calcola la durata di carriera reale (deduplicando le sovrapposizioni temporali), la ripartizione per categoria di competenze e il livello di copertura delle evidenze:
 ```bash
 careervault stats career.json

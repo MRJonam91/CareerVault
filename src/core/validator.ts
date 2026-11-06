@@ -22,9 +22,10 @@ function parseDateToNumber(dateStr: string): number {
   return year * 10000 + month * 100 + day;
 }
 
-function resolveText(text: LocalizedText, lang: SupportedLanguage): string {
+function resolveText(text?: LocalizedText, lang: SupportedLanguage = "en"): string {
+  if (!text) return "";
   if (typeof text === "string") return text;
-  return text[lang] || "";
+  return text[lang] || text.en || text.it || "";
 }
 
 function hasBothLanguages(text?: LocalizedText): boolean {
@@ -111,10 +112,19 @@ export function validateProfile(profile: unknown): ValidationResult {
 
   // Skills registry check
   const skillInventory = new Set<string>();
+  const currentYear = new Date().getFullYear();
   if (Array.isArray(p.skills)) {
     for (const s of p.skills) {
       if (s && typeof s.name === "string") {
         skillInventory.add(s.name.toLowerCase().trim());
+        if (s.lastUsed && parseInt(s.lastUsed, 10) < currentYear - 4) {
+          warnings.push({
+            field: `skills.${s.name}`,
+            code: "STALE_SKILL",
+            message: `Skill '${s.name}' was last used in ${s.lastUsed} (>4 years ago)`,
+            suggestion: "Consider verifying current proficiency level or refreshing references",
+          });
+        }
       }
     }
   } else {
@@ -141,8 +151,12 @@ export function validateProfile(profile: unknown): ValidationResult {
       company: string;
       start: number;
       end: number;
+      startDateStr: string;
+      endDateStr: string | null;
       isConcurrent: boolean;
     }> = [];
+
+    const SENIOR_KEYWORDS = ["senior", "lead", "staff", "principal", "head", "director", "architect"];
 
     p.experiences.forEach((exp: WorkExperience, idx: number) => {
       const fieldPrefix = `experiences[${idx}]`;
@@ -167,12 +181,25 @@ export function validateProfile(profile: unknown): ValidationResult {
           code: "MISSING_ROLE",
           message: "Role title is required",
         });
-      } else if (!hasBothLanguages(exp.role)) {
-        warnings.push({
-          field: `${fieldPrefix}.role`,
-          code: "PARTIAL_LOCALIZATION",
-          message: `Role at '${exp.company || idx}' is missing Italian or English translation`,
-        });
+      } else {
+        if (!hasBothLanguages(exp.role)) {
+          warnings.push({
+            field: `${fieldPrefix}.role`,
+            code: "PARTIAL_LOCALIZATION",
+            message: `Role at '${exp.company || idx}' is missing Italian or English translation`,
+          });
+        }
+
+        const roleText = resolveText(exp.role, "en").toLowerCase();
+        const isSeniorRole = SENIOR_KEYWORDS.some((kw) => roleText.includes(kw));
+        if (isSeniorRole && (!exp.metrics || exp.metrics.length === 0)) {
+          warnings.push({
+            field: `${fieldPrefix}.metrics`,
+            code: "MISSING_SENIOR_METRICS",
+            message: `Senior role '${resolveText(exp.role, "en")}' at '${exp.company}' has no quantified metrics`,
+            suggestion: "Add business metrics (e.g. latency reduction %, team size led, cost saved)",
+          });
+        }
       }
 
       // Date validation
@@ -224,6 +251,8 @@ export function validateProfile(profile: unknown): ValidationResult {
           company: exp.company || `Role #${idx}`,
           start: startNum,
           end: endNum,
+          startDateStr: exp.startDate,
+          endDateStr: exp.endDate ?? null,
           isConcurrent: Boolean(exp.isConcurrent),
         });
       }
@@ -277,7 +306,6 @@ export function validateProfile(profile: unknown): ValidationResult {
         const b = fullTimeRanges[j]!;
         if (a.isConcurrent || b.isConcurrent) continue;
 
-        // Two intervals [start, end] overlap if startA <= endB and startB <= endA
         const overlaps = a.start <= b.end && b.start <= a.end;
         if (overlaps) {
           warnings.push({
@@ -285,6 +313,29 @@ export function validateProfile(profile: unknown): ValidationResult {
             code: "OVERLAPPING_FULLTIME_ROLE",
             message: `Conflicting concurrent full-time roles detected between '${a.company}' and '${b.company}' without isConcurrent: true`,
             suggestion: "If roles were genuinely concurrent, add 'isConcurrent: true'; otherwise reconcile start/end dates",
+          });
+        }
+      }
+    }
+
+    // Gap analysis between chronological roles
+    const sortedRanges = [...fullTimeRanges].sort((a, b) => a.start - b.start);
+    for (let i = 0; i < sortedRanges.length - 1; i++) {
+      const current = sortedRanges[i]!;
+      const next = sortedRanges[i + 1]!;
+      if (current.end < 99999999 && next.start > current.end) {
+        const curYear = Math.floor(current.end / 10000);
+        const curMonth = Math.floor((current.end % 10000) / 100);
+        const nextYear = Math.floor(next.start / 10000);
+        const nextMonth = Math.floor((next.start % 10000) / 100);
+        const gapMonths = (nextYear - curYear) * 12 + (nextMonth - curMonth);
+
+        if (gapMonths > 3) {
+          warnings.push({
+            field: "experiences",
+            code: "EMPLOYMENT_GAP",
+            message: `Employment gap of ${gapMonths} months detected between '${current.company}' and '${next.company}'`,
+            suggestion: "Clarify whether this period was education, sabbatical, or independent consulting",
           });
         }
       }

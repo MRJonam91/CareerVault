@@ -6,12 +6,14 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { validateProfile } from "../core/validator.ts";
 import { exportMarkdownCv } from "../core/markdown-exporter.ts";
-import { exportJsonResume } from "../core/json-resume-exporter.ts";
+import { exportHtmlCv } from "../core/html-exporter.ts";
+import { exportJsonResume, importJsonResume } from "../core/json-resume-exporter.ts";
+import { diffProfiles } from "../core/diff.ts";
 import { getCareerStats } from "../core/stats.ts";
 import { formatSponsorNotice, shouldShowSponsorNotice } from "../core/constants.ts";
-import type { CareerProfile, SupportedLanguage } from "../core/types.ts";
+import type { CareerProfile, SupportedLanguage, CvStyle } from "../core/types.ts";
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0-beta.1";
 
 const SAMPLE_PROFILE: CareerProfile = {
   schemaVersion: "1.0.0",
@@ -120,6 +122,15 @@ const SAMPLE_PROFILE: CareerProfile = {
           en: "Implemented PSD2-compliant payment gateway handling peak traffic of 15,000 req/sec.",
         },
       ],
+      metrics: [
+        {
+          label: {
+            it: "Throughput transazioni di picco",
+            en: "Peak transaction throughput",
+          },
+          value: "15,000 req/sec",
+        },
+      ],
       skills: ["Node.js", "TypeScript", "PostgreSQL", "Redis", "Docker"],
       evidence: [
         "https://example.com/press/cloudwave-banking-gateway",
@@ -211,14 +222,20 @@ USAGE:
 COMMANDS:
   init [path]                    Create a new verifiable career profile (default: career.json)
   validate <file>                Validate profile schema and audit for inconsistencies/anomalies
-  export <file>                  Export deterministic CV (Markdown or JSON Resume)
+  export <file>                  Export deterministic CV (Markdown, HTML, or JSON Resume)
+  diff <fileA> <fileB>           Compare two career profiles and report added/modified/removed items
+  import <resume.json>           Convert a JSON Resume (jsonresume.org) to CareerVault profile
   stats <file>                   Calculate career metrics, tenure, and verifiable evidence score
 
-OPTIONS:
+EXPORT OPTIONS:
   -l, --lang <it|en>             Target language for export (default: en)
-  -f, --format <md|json-resume>  Export format: 'md' (Markdown CV) or 'json-resume' (default: md)
+  -f, --format <md|html|json-resume> Export format (default: md)
+  -s, --style <standard|compact|detailed> Presentation style (default: standard)
+  --filter-skills <skills>       Comma-separated skills to emphasize/filter
+  --max-years <years>            Filter roles to recent N years
+  --limit <count>                Limit number of experiences displayed
   -o, --out <file>               Write output to file instead of stdout
-  --json                         Output machine-readable JSON (for validate and stats)
+  --json                         Output machine-readable JSON (for validate, stats, and diff)
   -v, --version                  Display version
   -h, --help                     Display this help message
 
@@ -226,8 +243,9 @@ EXAMPLES:
   careervault init career.json
   careervault validate career.json
   careervault export career.json --lang it --format md --out cv-italiano.md
-  careervault export career.json --lang en --format md --out cv-english.md
-  careervault export career.json --format json-resume --out resume.json
+  careervault export career.json --lang en --format html --out resume.html
+  careervault diff career-2024.json career-2026.json
+  careervault import resume.json --out career.json
   careervault stats career.json
 `);
 }
@@ -327,6 +345,67 @@ export function main(): void {
     process.exit(result.valid ? 0 : 1);
   }
 
+  if (command === "diff") {
+    const fileA = args[1];
+    const fileB = args[2];
+    if (!fileA || !fileB || fileA.startsWith("-") || fileB.startsWith("-")) {
+      console.error("Error: Please provide two career profile JSON files: careervault diff <old.json> <new.json>");
+      process.exit(1);
+    }
+
+    const isJson = args.includes("--json");
+    const profA = loadProfile(fileA);
+    const profB = loadProfile(fileB);
+    const diff = diffProfiles(profA, profB);
+
+    if (isJson) {
+      console.log(JSON.stringify(diff, null, 2));
+      return;
+    }
+
+    console.log(`\nCareer Ledger Diff: ${fileA} ➔ ${fileB}`);
+    console.log("─".repeat(50));
+
+    if (!diff.hasDifferences) {
+      console.log("✓ No differences detected between the two career profiles.");
+      return;
+    }
+
+    console.log(`Summary: +${diff.summary.added} added, ~${diff.summary.modified} modified, -${diff.summary.removed} removed\n`);
+
+    for (const c of diff.changes) {
+      const icon = c.type === "added" ? "➕" : c.type === "removed" ? "➖" : "✏️";
+      console.log(`${icon} [${c.category.toUpperCase()}] ${c.item}`);
+      if (c.details) console.log(`   ↳ ${c.details}`);
+    }
+    return;
+  }
+
+  if (command === "import") {
+    const resumeFile = args[1];
+    if (!resumeFile || resumeFile.startsWith("-")) {
+      console.error("Error: Please provide a JSON Resume file: careervault import <resume.json>");
+      process.exit(1);
+    }
+
+    let outPath = "career.json";
+    const outIdx = args.findIndex((a) => a === "-o" || a === "--out");
+    if (outIdx !== -1 && args[outIdx + 1]) {
+      outPath = args[outIdx + 1]!;
+    }
+
+    const raw = JSON.parse(readFileSync(resolve(process.cwd(), resumeFile), "utf8"));
+    const imported = importJsonResume(raw);
+
+    const fullOut = resolve(process.cwd(), outPath);
+    mkdirSync(dirname(fullOut), { recursive: true });
+    writeFileSync(fullOut, JSON.stringify(imported, null, 2) + "\n", "utf8");
+
+    console.log(`[OK] Successfully imported JSON Resume into CareerVault format: ${outPath}`);
+    console.log("Next: audit profile with 'careervault validate " + outPath + "'");
+    return;
+  }
+
   if (command === "export") {
     const fileArg = args[1];
     if (!fileArg || fileArg.startsWith("-")) {
@@ -336,7 +415,6 @@ export function main(): void {
 
     const profile = loadProfile(fileArg);
 
-    // Extract options
     let lang: SupportedLanguage = "en";
     const langIdx = args.findIndex((a) => a === "-l" || a === "--lang");
     if (langIdx !== -1 && args[langIdx + 1]) {
@@ -355,6 +433,30 @@ export function main(): void {
       format = args[fmtIdx + 1]!.toLowerCase();
     }
 
+    let style: CvStyle = "standard";
+    const styleIdx = args.findIndex((a) => a === "-s" || a === "--style");
+    if (styleIdx !== -1 && args[styleIdx + 1]) {
+      style = args[styleIdx + 1] as CvStyle;
+    }
+
+    let filterSkills: string[] | undefined;
+    const skillsIdx = args.findIndex((a) => a === "--filter-skills");
+    if (skillsIdx !== -1 && args[skillsIdx + 1]) {
+      filterSkills = args[skillsIdx + 1]!.split(",").map((s) => s.trim());
+    }
+
+    let maxYears: number | undefined;
+    const yearsIdx = args.findIndex((a) => a === "--max-years");
+    if (yearsIdx !== -1 && args[yearsIdx + 1]) {
+      maxYears = parseInt(args[yearsIdx + 1]!, 10);
+    }
+
+    let limitExperiences: number | undefined;
+    const limitIdx = args.findIndex((a) => a === "--limit");
+    if (limitIdx !== -1 && args[limitIdx + 1]) {
+      limitExperiences = parseInt(args[limitIdx + 1]!, 10);
+    }
+
     let outPath: string | undefined;
     const outIdx = args.findIndex((a) => a === "-o" || a === "--out");
     if (outIdx !== -1 && args[outIdx + 1]) {
@@ -363,11 +465,13 @@ export function main(): void {
 
     let output = "";
     if (format === "md" || format === "markdown") {
-      output = exportMarkdownCv(profile, { lang });
+      output = exportMarkdownCv(profile, { lang, style, filterSkills, maxYears, limitExperiences });
+    } else if (format === "html") {
+      output = exportHtmlCv(profile, { lang, style, filterSkills, maxYears, limitExperiences });
     } else if (format === "json-resume" || format === "json") {
       output = JSON.stringify(exportJsonResume(profile, { lang }), null, 2) + "\n";
     } else {
-      console.error(`Unsupported format '${format}'. Supported: md, json-resume`);
+      console.error(`Unsupported format '${format}'. Supported: md, html, json-resume`);
       process.exit(1);
     }
 
@@ -422,7 +526,6 @@ export function main(): void {
   process.exit(1);
 }
 
-// Direct invocation check
 if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, "/")}` || process.argv[1]?.endsWith("careervault") || process.argv[1]?.endsWith("index.ts") || process.argv[1]?.endsWith("index.js")) {
   main();
 }

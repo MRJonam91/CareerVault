@@ -2,25 +2,10 @@
 // Copyright 2026 Manoj Rollo (MRJonam91)
 
 export type SupportedLanguage = "it" | "en";
-
-export type LocalizedText =
-  | string
-  | {
-      it: string;
-      en: string;
-    };
-
-export interface SocialProfile {
-  network: string;
-  username: string;
-  url: string;
-}
-
-export interface ProfileLocation {
-  city?: string;
-  region?: string;
-  countryCode?: string;
-}
+export type CvStyle = "standard" | "compact" | "detailed";
+export type LocalizedText = string | { it: string; en: string };
+export interface SocialProfile { network: string; username: string; url: string; }
+export interface ProfileLocation { city?: string; region?: string; countryCode?: string; }
 
 export interface Basics {
   name: string;
@@ -33,18 +18,8 @@ export interface Basics {
   profiles?: SocialProfile[];
 }
 
-export type EmploymentType =
-  | "full-time"
-  | "part-time"
-  | "contract"
-  | "freelance"
-  | "internship";
-
-export interface CareerMetric {
-  label: LocalizedText;
-  value: string;
-  impact?: LocalizedText;
-}
+export type EmploymentType = "full-time" | "part-time" | "contract" | "freelance" | "internship";
+export interface CareerMetric { label: LocalizedText; value: string; impact?: LocalizedText; }
 
 export interface WorkExperience {
   id: string;
@@ -74,16 +49,7 @@ export interface EducationEntry {
   courses?: LocalizedText[];
 }
 
-export type SkillCategory =
-  | "languages"
-  | "frameworks"
-  | "databases"
-  | "cloud-devops"
-  | "architecture"
-  | "tools"
-  | "management"
-  | "other";
-
+export type SkillCategory = "languages" | "frameworks" | "databases" | "cloud-devops" | "architecture" | "tools" | "management" | "other";
 export type SkillLevel = "beginner" | "intermediate" | "advanced" | "expert";
 
 export interface SkillEntry {
@@ -116,20 +82,8 @@ export interface CertificationEntry {
   url?: string;
 }
 
-export type LanguageFluency =
-  | "native"
-  | "fluent"
-  | "c2"
-  | "c1"
-  | "b2"
-  | "b1"
-  | "a2"
-  | "a1";
-
-export interface LanguageEntry {
-  language: LocalizedText;
-  fluency: LanguageFluency;
-}
+export type LanguageFluency = "native" | "fluent" | "c2" | "c1" | "b2" | "b1" | "a2" | "a1";
+export interface LanguageEntry { language: LocalizedText; fluency: LanguageFluency; }
 
 export interface CareerProfile {
   schemaVersion: "1.0.0" | string;
@@ -140,38 +94,16 @@ export interface CareerProfile {
   projects?: ProjectEntry[];
   certifications?: CertificationEntry[];
   languages?: LanguageEntry[];
-  meta?: {
-    lastUpdated?: string;
-    version?: string;
-    notes?: string;
-  };
+  meta?: { lastUpdated?: string; version?: string; notes?: string; };
 }
 
-export interface ValidationError {
-  field: string;
-  code: string;
-  message: string;
-}
-
-export interface ValidationWarning {
-  field: string;
-  code: string;
-  message: string;
-  suggestion?: string;
-}
-
-export interface ValidationResult {
-  valid: boolean;
-  errors: ValidationError[];
-  warnings: ValidationWarning[];
-}
+export interface ValidationError { field: string; code: string; message: string; }
+export interface ValidationWarning { field: string; code: string; message: string; suggestion?: string; }
+export interface ValidationResult { valid: boolean; errors: ValidationError[]; warnings: ValidationWarning[]; }
 
 export interface CareerStats {
   totalExperienceMonths: number;
-  totalExperienceFormatted: {
-    it: string;
-    en: string;
-  };
+  totalExperienceFormatted: { it: string; en: string };
   activeRolesCount: number;
   totalRolesCount: number;
   skillsCount: number;
@@ -180,4 +112,27 @@ export interface CareerStats {
   bilingualCoveragePercent: number;
   latestRoleTitle?: string;
   latestCompany?: string;
+}
+
+export interface ExportOptions {
+  lang: SupportedLanguage;
+  style?: CvStyle;
+  filterSkills?: string[];
+  maxYears?: number;
+  limitExperiences?: number;
+}
+
+export interface CareerDiffChange {
+  category: "basics" | "experiences" | "skills" | "education" | "projects" | "certifications";
+  type: "added" | "removed" | "modified";
+  item: string;
+  details?: string;
+  oldValue?: unknown;
+  newValue?: unknown;
+}
+
+export interface CareerDiffResult {
+  hasDifferences: boolean;
+  changes: CareerDiffChange[];
+  summary: { added: number; removed: number; modified: number };
 }

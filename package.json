@@ -1,6 +1,6 @@
 {
   "name": "careervault",
-  "version": "0.1.0",
+  "version": "0.2.0-beta.1",
   "description": "Deterministic career ledger & single source of truth: validate career histories, detect CV anomalies, and export verifiable Italian & English Markdown résumés and JSON Resume.",
   "type": "module",
   "license": "Apache-2.0",

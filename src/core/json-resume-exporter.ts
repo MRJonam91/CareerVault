@@ -1,7 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Manoj Rollo (MRJonam91)
 
-import type { CareerProfile, LocalizedText, SupportedLanguage } from "./types.ts";
+import type {
+  CareerProfile,
+  LocalizedText,
+  SupportedLanguage,
+  WorkExperience,
+  EducationEntry,
+  SkillEntry,
+  ProjectEntry,
+  CertificationEntry,
+  LanguageEntry,
+  SkillCategory,
+  LanguageFluency,
+} from "./types.ts";
 
 function resolveText(text?: LocalizedText, lang: SupportedLanguage = "en"): string {
   if (!text) return "";
@@ -165,6 +177,117 @@ export function exportJsonResume(
       canonical: "https://github.com/MRJonam91/CareerVault",
       version: "1.0.0",
       lastModified: new Date().toISOString(),
+    },
+  };
+}
+
+export function importJsonResume(raw: unknown): CareerProfile {
+  if (!raw || typeof raw !== "object") {
+    throw new Error("Invalid JSON Resume input: must be an object");
+  }
+  const r = raw as Record<string, any>;
+  const b = r["basics"] ?? {};
+
+  const experiences: WorkExperience[] = Array.isArray(r["work"])
+    ? r["work"].map((w: any, idx: number) => ({
+        id: `exp-${idx + 1}-${String(w.name || "role").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+        company: w.name || "Company",
+        role: w.position || "Developer",
+        employmentType: "full-time",
+        startDate: w.startDate || "2020-01",
+        endDate: w.endDate ?? null,
+        isCurrent: !w.endDate,
+        summary: w.summary || undefined,
+        highlights: Array.isArray(w.highlights) ? w.highlights : [],
+        skills: Array.isArray(w.keywords) ? w.keywords : [],
+      }))
+    : [];
+
+  const skills: SkillEntry[] = [];
+  if (Array.isArray(r["skills"])) {
+    for (const s of r["skills"]) {
+      if (Array.isArray(s.keywords) && s.keywords.length > 0) {
+        for (const kw of s.keywords) {
+          skills.push({
+            name: String(kw),
+            category: (s.name?.toLowerCase().includes("lang") ? "languages" : "tools") as SkillCategory,
+            level: s.level ? (String(s.level).toLowerCase() as any) : undefined,
+          });
+        }
+      } else if (s.name) {
+        skills.push({
+          name: String(s.name),
+          category: "tools",
+          level: s.level ? (String(s.level).toLowerCase() as any) : undefined,
+        });
+      }
+    }
+  }
+
+  const education: EducationEntry[] = Array.isArray(r["education"])
+    ? r["education"].map((edu: any, idx: number) => ({
+        id: `edu-${idx + 1}`,
+        institution: edu.institution || "University",
+        area: edu.area || "Studies",
+        studyType: edu.studyType || "Degree",
+        startDate: edu.startDate || "2015-09",
+        endDate: edu.endDate ?? null,
+        score: edu.score,
+      }))
+    : [];
+
+  const projects: ProjectEntry[] = Array.isArray(r["projects"])
+    ? r["projects"].map((p: any, idx: number) => ({
+        id: `proj-${idx + 1}`,
+        name: p.name || "Project",
+        description: p.description || "",
+        highlights: Array.isArray(p.highlights) ? p.highlights : [],
+        skills: Array.isArray(p.keywords) ? p.keywords : [],
+        startDate: p.startDate,
+        endDate: p.endDate ?? null,
+        url: p.url,
+      }))
+    : [];
+
+  const certifications: CertificationEntry[] = Array.isArray(r["certificates"])
+    ? r["certificates"].map((c: any, idx: number) => ({
+        id: `cert-${idx + 1}`,
+        name: c.name || "Certificate",
+        issuer: c.issuer || "Issuer",
+        issueDate: c.date || "2023-01",
+        url: c.url,
+      }))
+    : [];
+
+  const languages: LanguageEntry[] = Array.isArray(r["languages"])
+    ? r["languages"].map((l: any) => ({
+        language: l.language || "English",
+        fluency: (String(l.fluency || "fluent").toLowerCase() as LanguageFluency) || "fluent",
+      }))
+    : [];
+
+  return {
+    schemaVersion: "1.0.0",
+    basics: {
+      name: b.name || "Unnamed",
+      label: b.label || "Professional",
+      email: b.email || "email@example.com",
+      phone: b.phone,
+      url: b.url,
+      summary: b.summary || "",
+      location: b.location,
+      profiles: b.profiles,
+    },
+    experiences,
+    skills,
+    education,
+    projects,
+    certifications,
+    languages,
+    meta: {
+      lastUpdated: new Date().toISOString().split("T")[0],
+      version: "1.0.0",
+      notes: "Imported from JSON Resume format",
     },
   };
 }

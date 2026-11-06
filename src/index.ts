@@ -5,5 +5,7 @@ export * from "./core/types.ts";
 export * from "./core/constants.ts";
 export * from "./core/validator.ts";
 export * from "./core/markdown-exporter.ts";
+export * from "./core/html-exporter.ts";
 export * from "./core/json-resume-exporter.ts";
+export * from "./core/diff.ts";
 export * from "./core/stats.ts";

@@ -100,7 +100,19 @@ careervault export career.json --lang en --format md -o dist/cv-en.md
 careervault export career.json --format json-resume -o dist/resume.json
 ```
 
-### 4. `careervault stats <file> [--json]`
+### 4. `careervault diff <old.json> <new.json> [--json]`
+Compares two career ledgers and displays an audit trail of changes (added/removed/modified roles, dates, metrics, skills):
+```bash
+careervault diff career-2024.json career-2026.json
+```
+
+### 5. `careervault import <resume.json> [-o <career.json>]`
+Imports an existing [JSON Resume](https://jsonresume.org) file and converts it into a structured CareerVault ledger:
+```bash
+careervault import resume.json -o career.json
+```
+
+### 6. `careervault stats <file> [--json]`
 Calculates true career longevity (deduplicating overlapping tenures), skill density, and verification coverage:
 ```bash
 careervault stats career.json

@@ -3,23 +3,13 @@
 
 import type {
   CareerProfile,
+  ExportOptions,
   LocalizedText,
   SupportedLanguage,
-  WorkExperience,
-  ProjectEntry,
-  EducationEntry,
-  CertificationEntry,
-  LanguageEntry,
 } from "./types.ts";
 
-const MONTHS_IT = [
-  "Gen", "Feb", "Mar", "Apr", "Mag", "Giu",
-  "Lug", "Ago", "Set", "Ott", "Nov", "Dic",
-];
-const MONTHS_EN = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
+const MONTHS_IT = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
+const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function resolveText(text?: LocalizedText, lang: SupportedLanguage = "en"): string {
   if (!text) return "";
@@ -79,10 +69,11 @@ const FLUENCY_LABELS: Record<string, { it: string; en: string }> = {
 
 export function exportMarkdownCv(
   profile: CareerProfile,
-  options: { lang: SupportedLanguage } = { lang: "en" }
+  options: ExportOptions = { lang: "en" }
 ): string {
   const lang = options.lang;
   const isIt = lang === "it";
+  const isCompact = options.style === "compact";
   const b = profile.basics;
 
   const lines: string[] = [];
@@ -90,32 +81,22 @@ export function exportMarkdownCv(
   // Header
   lines.push(`# ${b.name}`);
   const title = resolveText(b.label, lang);
-  if (title) {
-    lines.push(`**${title}**\n`);
-  }
+  if (title) lines.push(`**${title}**\n`);
 
   // Contact info
   const contactParts: string[] = [];
   if (b.email) contactParts.push(`[${b.email}](mailto:${b.email})`);
   if (b.phone) contactParts.push(b.phone);
   if (b.location) {
-    const loc = [b.location.city, b.location.region, b.location.countryCode]
-      .filter(Boolean)
-      .join(", ");
+    const loc = [b.location.city, b.location.region, b.location.countryCode].filter(Boolean).join(", ");
     if (loc) contactParts.push(loc);
   }
   if (b.url) contactParts.push(`[${b.url.replace(/^https?:\/\//, "")}](${b.url})`);
-
   if (Array.isArray(b.profiles)) {
-    for (const p of b.profiles) {
-      contactParts.push(`[${p.network}: ${p.username}](${p.url})`);
-    }
+    for (const p of b.profiles) contactParts.push(`[${p.network}: ${p.username}](${p.url})`);
   }
 
-  if (contactParts.length > 0) {
-    lines.push(contactParts.join(" • ") + "\n");
-  }
-
+  if (contactParts.length > 0) lines.push(contactParts.join(" • ") + "\n");
   lines.push("---");
 
   // Summary
@@ -125,11 +106,33 @@ export function exportMarkdownCv(
     lines.push(summaryText);
   }
 
+  // Filter experiences
+  let experiences = profile.experiences ?? [];
+  if (options.filterSkills && options.filterSkills.length > 0) {
+    const filterSet = new Set(options.filterSkills.map((s) => s.toLowerCase().trim()));
+    experiences = experiences.filter((exp) =>
+      exp.skills?.some((s) => filterSet.has(s.toLowerCase().trim()))
+    );
+  }
+
+  if (options.maxYears && options.maxYears > 0) {
+    const currentYear = new Date().getFullYear();
+    const minYear = currentYear - options.maxYears;
+    experiences = experiences.filter((exp) => {
+      const year = parseInt(exp.startDate.split("-")[0] ?? "1970", 10);
+      return year >= minYear;
+    });
+  }
+
+  if (options.limitExperiences && options.limitExperiences > 0) {
+    experiences = experiences.slice(0, options.limitExperiences);
+  }
+
   // Work Experiences
-  if (Array.isArray(profile.experiences) && profile.experiences.length > 0) {
+  if (experiences.length > 0) {
     lines.push(`\n## ${isIt ? "Esperienza Professionale" : "Work Experience"}\n`);
 
-    for (const exp of profile.experiences) {
+    for (const exp of experiences) {
       const roleStr = resolveText(exp.role, lang);
       lines.push(`### ${roleStr} — **${exp.company}**`);
 
@@ -141,18 +144,15 @@ export function exportMarkdownCv(
       lines.push(`*${metaTokens.join(" | ")}*\n`);
 
       const expSummary = resolveText(exp.summary, lang);
-      if (expSummary) {
-        lines.push(`${expSummary}\n`);
+      if (expSummary && !isCompact) lines.push(`${expSummary}\n`);
+
+      const highlights = isCompact ? (exp.highlights ?? []).slice(0, 2) : exp.highlights ?? [];
+      for (const hl of highlights) {
+        const item = resolveText(hl, lang);
+        if (item) lines.push(`- ${item}`);
       }
 
-      if (Array.isArray(exp.highlights) && exp.highlights.length > 0) {
-        for (const hl of exp.highlights) {
-          const item = resolveText(hl, lang);
-          if (item) lines.push(`- ${item}`);
-        }
-      }
-
-      if (Array.isArray(exp.metrics) && exp.metrics.length > 0) {
+      if (Array.isArray(exp.metrics)) {
         for (const m of exp.metrics) {
           const label = resolveText(m.label, lang);
           const impact = m.impact ? ` (${resolveText(m.impact, lang)})` : "";
@@ -164,7 +164,7 @@ export function exportMarkdownCv(
         lines.push(`\n*${isIt ? "Competenze chiave" : "Key skills"}:* ${exp.skills.join(", ")}`);
       }
 
-      if (Array.isArray(exp.evidence) && exp.evidence.length > 0) {
+      if (!isCompact && Array.isArray(exp.evidence) && exp.evidence.length > 0) {
         const evLinks = exp.evidence.map((u, i) => `[#${i + 1}](${u})`).join(" ");
         lines.push(`*${isIt ? "Evidenze verificabili" : "Verifiable evidence"}:* ${evLinks}`);
       }
@@ -174,7 +174,7 @@ export function exportMarkdownCv(
   }
 
   // Key Projects
-  if (Array.isArray(profile.projects) && profile.projects.length > 0) {
+  if (!isCompact && Array.isArray(profile.projects) && profile.projects.length > 0) {
     lines.push(`## ${isIt ? "Progetti Rilevanti" : "Key Projects"}\n`);
 
     for (const proj of profile.projects) {
