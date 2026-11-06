@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 330" width="760" height="330" role="img" aria-label="CareerVault demo: validate career histories, audit chronological consistency, and export deterministic bilingual Markdown résumés.">
+  <metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dc="http://purl.org/dc/elements/1.1/"><rdf:Description dc:creator="MRJonam91" dc:identifier="cv.vault.e7b3a9" dc:rights="(c) 2026 Manoj Rollo (MRJonam91)"/></rdf:RDF></metadata>
+  <style>
+    .l { font: 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; opacity: 0; animation: in 7s infinite; }
+    @keyframes in { 0% { opacity: 0; } 4% { opacity: 1; } 92% { opacity: 1; } 100% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { .l { animation: none; opacity: 1; } }
+  </style>
+  <rect width="760" height="330" rx="12" fill="#0d1117"/>
+  <rect width="760" height="36" rx="12" fill="#161b22"/>
+  <rect y="24" width="760" height="12" fill="#161b22"/>
+  <circle cx="22" cy="18" r="6" fill="#ff5f57"/><circle cx="42" cy="18" r="6" fill="#febc2e"/><circle cx="62" cy="18" r="6" fill="#28c840"/>
+  <text x="380" y="23" fill="#8b949e" text-anchor="middle" style="font: 13px ui-monospace, monospace">careervault — career single source of truth</text>
+  
+  <text x="24" y="66" fill="#e6edf3" class="l" style="animation-delay:0.3s"><tspan fill="#58a6ff">$ </tspan>careervault validate career.json</text>
+  <text x="24" y="92" fill="#3fb950" class="l" style="animation-delay:0.8s">✓ Profile valid! 0 blocking errors | 2 roles verified | 0 date inversions</text>
+  
+  <text x="24" y="128" fill="#e6edf3" class="l" style="animation-delay:1.5s"><tspan fill="#58a6ff">$ </tspan>careervault export career.json --lang it --format md --out cv-italiano.md</text>
+  <text x="24" y="154" fill="#3fb950" class="l" style="animation-delay:2.0s">✓ [OK] Exported Italian Markdown CV (Alex Rossi — Staff Platform Engineer)</text>
+
+  <text x="24" y="190" fill="#e6edf3" class="l" style="animation-delay:2.7s"><tspan fill="#58a6ff">$ </tspan>careervault stats career.json</text>
+  <text x="24" y="216" fill="#d29922" class="l" style="animation-delay:3.2s">★ Duration: 5 years, 8 months (deduplicated) | Evidence: 100% | Bilingual: 100%</text>
+
+  <text x="24" y="252" fill="#e6edf3" class="l" style="animation-delay:3.9s"><tspan fill="#58a6ff">$ </tspan>careervault export career.json --format json-resume --out resume.json</text>
+  <text x="24" y="278" fill="#3fb950" class="l" style="animation-delay:4.4s">✓ [OK] Standard jsonresume.org schema generated successfully</text>
+  <text x="24" y="304" fill="#8b949e" class="l" style="animation-delay:4.9s">♥ Sostieni / Support: github.com/sponsors/MRJonam91 · ko-fi.com/mrjonam</text>
+</svg>

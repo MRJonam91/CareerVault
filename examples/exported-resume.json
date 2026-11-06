@@ -1,0 +1,128 @@
+{
+  "basics": {
+    "name": "Alex Rossi",
+    "label": "Senior Software Engineer & System Architect",
+    "email": "alex.rossi@example.com",
+    "phone": "+39 02 1234567",
+    "url": "https://alexrossi.dev",
+    "summary": "Software engineer with 8+ years of experience designing distributed systems, cloud platforms, and resilient architectures. Passionate about reliability, verifiable code, and open standards.",
+    "location": {
+      "city": "Milano",
+      "region": "Lombardia",
+      "countryCode": "IT"
+    },
+    "profiles": [
+      {
+        "network": "GitHub",
+        "username": "alexrossi",
+        "url": "https://github.com/alexrossi"
+      },
+      {
+        "network": "LinkedIn",
+        "username": "alex-rossi",
+        "url": "https://linkedin.com/in/alex-rossi"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "TechCorp Global",
+      "position": "Staff Platform Engineer",
+      "startDate": "2023-01",
+      "summary": "Technical leadership for enterprise data infrastructure and microservice platforms.",
+      "highlights": [
+        "Redesigned data ingestion pipeline, reducing processing latency by 45% under identical infrastructure costs.",
+        "Led a cross-functional team of 7 engineers during a zero-downtime Kubernetes migration.",
+        "-45% — Data ingestion latency",
+        "99.98% — Platform availability"
+      ]
+    },
+    {
+      "name": "CloudWave Solutions",
+      "position": "Senior Backend Developer",
+      "startDate": "2019-03",
+      "endDate": "2022-12",
+      "summary": "Developed REST and event-driven APIs for banking and eCommerce enterprise customers.",
+      "highlights": [
+        "Implemented PSD2-compliant payment gateway handling peak traffic of 15,000 req/sec."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Politecnico di Torino",
+      "area": "Computer Engineering",
+      "studyType": "Master of Science",
+      "startDate": "2016-10",
+      "endDate": "2018-10",
+      "score": "110/110 cum laude"
+    }
+  ],
+  "skills": [
+    {
+      "name": "languages",
+      "keywords": [
+        "TypeScript",
+        "Go"
+      ]
+    },
+    {
+      "name": "frameworks",
+      "keywords": [
+        "Node.js"
+      ]
+    },
+    {
+      "name": "databases",
+      "keywords": [
+        "PostgreSQL",
+        "Redis"
+      ]
+    },
+    {
+      "name": "cloud-devops",
+      "keywords": [
+        "Kubernetes",
+        "Docker"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "OpenDataGateway",
+      "description": "Lightweight open-source gateway for open API normalization and schema validation.",
+      "highlights": [
+        "Achieved 1,200+ GitHub stars and 50k monthly downloads."
+      ],
+      "keywords": [
+        "TypeScript",
+        "Node.js",
+        "Docker"
+      ],
+      "startDate": "2021-05",
+      "url": "https://github.com/alexrossi/open-data-gateway"
+    }
+  ],
+  "certificates": [
+    {
+      "name": "Certified Kubernetes Administrator (CKA)",
+      "issuer": "Cloud Native Computing Foundation (CNCF)",
+      "date": "2023-04"
+    }
+  ],
+  "languages": [
+    {
+      "language": "Italian",
+      "fluency": "native"
+    },
+    {
+      "language": "English",
+      "fluency": "c1"
+    }
+  ],
+  "meta": {
+    "canonical": "https://github.com/MRJonam91/CareerVault",
+    "version": "1.0.0",
+    "lastModified": "2026-11-06T13:11:03.629Z"
+  }
+}

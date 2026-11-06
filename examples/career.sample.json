@@ -1,0 +1,245 @@
+{
+  "schemaVersion": "1.0.0",
+  "basics": {
+    "name": "Alex Rossi",
+    "label": {
+      "it": "Ingegnere del Software Senior & System Architect",
+      "en": "Senior Software Engineer & System Architect"
+    },
+    "email": "alex.rossi@example.com",
+    "phone": "+39 02 1234567",
+    "url": "https://alexrossi.dev",
+    "summary": {
+      "it": "Ingegnere del software con oltre 8 anni di esperienza nella progettazione di sistemi distribuiti, piattaforme cloud e architetture resilienti. Focalizzato su affidabilità, verificabilità del codice e standard aperti.",
+      "en": "Software engineer with 8+ years of experience designing distributed systems, cloud platforms, and resilient architectures. Passionate about reliability, verifiable code, and open standards."
+    },
+    "location": {
+      "city": "Milano",
+      "region": "Lombardia",
+      "countryCode": "IT"
+    },
+    "profiles": [
+      {
+        "network": "GitHub",
+        "username": "alexrossi",
+        "url": "https://github.com/alexrossi"
+      },
+      {
+        "network": "LinkedIn",
+        "username": "alex-rossi",
+        "url": "https://linkedin.com/in/alex-rossi"
+      }
+    ]
+  },
+  "experiences": [
+    {
+      "id": "exp-techcorp-2023",
+      "company": "TechCorp Global",
+      "role": {
+        "it": "Staff Platform Engineer",
+        "en": "Staff Platform Engineer"
+      },
+      "employmentType": "full-time",
+      "location": "Milano, IT (Hybrid)",
+      "startDate": "2023-01",
+      "endDate": null,
+      "isCurrent": true,
+      "summary": {
+        "it": "Guida tecnica dell'infrastruttura dati e delle piattaforme microservizi aziendali.",
+        "en": "Technical leadership for enterprise data infrastructure and microservice platforms."
+      },
+      "highlights": [
+        {
+          "it": "Riprogettata la pipeline di ingestione dati, riducendo la latenza del 45% a parità di costi.",
+          "en": "Redesigned data ingestion pipeline, reducing processing latency by 45% under identical infrastructure costs."
+        },
+        {
+          "it": "Coordinato team cross-funzionale di 7 ingegneri nella migrazione zero-downtime a Kubernetes.",
+          "en": "Led a cross-functional team of 7 engineers during a zero-downtime Kubernetes migration."
+        }
+      ],
+      "metrics": [
+        {
+          "label": {
+            "it": "Latenza di ingestione dati",
+            "en": "Data ingestion latency"
+          },
+          "value": "-45%",
+          "impact": {
+            "it": "Risparmio di 120k€/anno di computazione",
+            "en": "Saved €120k/year in computing overhead"
+          }
+        },
+        {
+          "label": {
+            "it": "Disponibilità piattaforma",
+            "en": "Platform availability"
+          },
+          "value": "99.98%"
+        }
+      ],
+      "skills": [
+        "TypeScript",
+        "Node.js",
+        "Kubernetes",
+        "PostgreSQL",
+        "Go",
+        "Docker"
+      ],
+      "evidence": [
+        "https://github.com/alexrossi/k8s-migration-case-study"
+      ]
+    },
+    {
+      "id": "exp-cloudwave-2019",
+      "company": "CloudWave Solutions",
+      "role": {
+        "it": "Senior Backend Developer",
+        "en": "Senior Backend Developer"
+      },
+      "employmentType": "full-time",
+      "location": "Torino, IT",
+      "startDate": "2019-03",
+      "endDate": "2022-12",
+      "isCurrent": false,
+      "summary": {
+        "it": "Sviluppo di API REST ed event-driven per clienti del settore bancario ed eCommerce.",
+        "en": "Developed REST and event-driven APIs for banking and eCommerce enterprise customers."
+      },
+      "highlights": [
+        {
+          "it": "Implementato gateway di pagamento conforme a PSD2 gestendo picchi di 15.000 req/sec.",
+          "en": "Implemented PSD2-compliant payment gateway handling peak traffic of 15,000 req/sec."
+        }
+      ],
+      "skills": [
+        "Node.js",
+        "TypeScript",
+        "PostgreSQL",
+        "Redis",
+        "Docker"
+      ],
+      "evidence": [
+        "https://example.com/press/cloudwave-banking-gateway"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "id": "edu-polito-2018",
+      "institution": "Politecnico di Torino",
+      "area": {
+        "it": "Ingegneria Informatica",
+        "en": "Computer Engineering"
+      },
+      "studyType": {
+        "it": "Laurea Magistrale",
+        "en": "Master of Science"
+      },
+      "startDate": "2016-10",
+      "endDate": "2018-10",
+      "score": "110/110 cum laude"
+    }
+  ],
+  "skills": [
+    {
+      "name": "TypeScript",
+      "category": "languages",
+      "level": "expert",
+      "yearsOfExperience": 7
+    },
+    {
+      "name": "Node.js",
+      "category": "frameworks",
+      "level": "expert",
+      "yearsOfExperience": 8
+    },
+    {
+      "name": "Go",
+      "category": "languages",
+      "level": "intermediate",
+      "yearsOfExperience": 3
+    },
+    {
+      "name": "PostgreSQL",
+      "category": "databases",
+      "level": "advanced",
+      "yearsOfExperience": 6
+    },
+    {
+      "name": "Redis",
+      "category": "databases",
+      "level": "advanced",
+      "yearsOfExperience": 5
+    },
+    {
+      "name": "Kubernetes",
+      "category": "cloud-devops",
+      "level": "advanced",
+      "yearsOfExperience": 4
+    },
+    {
+      "name": "Docker",
+      "category": "cloud-devops",
+      "level": "expert",
+      "yearsOfExperience": 7
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-vault-core",
+      "name": "OpenDataGateway",
+      "role": {
+        "it": "Creatore & Maintainer",
+        "en": "Creator & Maintainer"
+      },
+      "description": {
+        "it": "Gateway leggero open source per la normalizzazione di API aperte con validazione a schema.",
+        "en": "Lightweight open-source gateway for open API normalization and schema validation."
+      },
+      "url": "https://github.com/alexrossi/open-data-gateway",
+      "highlights": [
+        {
+          "it": "Raggiunte oltre 1.200 stelle su GitHub e 50k download mensili.",
+          "en": "Achieved 1,200+ GitHub stars and 50k monthly downloads."
+        }
+      ],
+      "skills": [
+        "TypeScript",
+        "Node.js",
+        "Docker"
+      ],
+      "startDate": "2021-05",
+      "endDate": null
+    }
+  ],
+  "certifications": [
+    {
+      "id": "cert-cka-2023",
+      "name": "Certified Kubernetes Administrator (CKA)",
+      "issuer": "Cloud Native Computing Foundation (CNCF)",
+      "issueDate": "2023-04",
+      "credentialId": "CKA-78901234"
+    }
+  ],
+  "languages": [
+    {
+      "language": {
+        "it": "Italiano",
+        "en": "Italian"
+      },
+      "fluency": "native"
+    },
+    {
+      "language": {
+        "it": "Inglese",
+        "en": "English"
+      },
+      "fluency": "c1"
+    }
+  ],
+  "meta": {
+    "lastUpdated": "2026-11-06",
+    "version": "1.0.0"
+  }
+}
