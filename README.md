@@ -112,7 +112,14 @@ Imports an existing [JSON Resume](https://jsonresume.org) file and converts it i
 careervault import resume.json -o career.json
 ```
 
-### 6. `careervault stats <file> [--json]`
+### 6. `careervault anonymize <file> [-o <career.blind.json>]`
+Generates a blind-screening version with personal data (PII) and company names redacted:
+```bash
+careervault anonymize career.json -o career.blind.json
+careervault export career.json --anonymize --lang en -o blind-resume.md
+```
+
+### 7. `careervault stats <file> [--json]`
 Calculates true career longevity (deduplicating overlapping tenures), skill density, and verification coverage:
 ```bash
 careervault stats career.json

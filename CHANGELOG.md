@@ -6,16 +6,19 @@ All notable changes to this project are documented in this file.
 Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 e rispetta il [Semantic Versioning](https://semver.org/).
 
-## [0.2.0-beta.1] - 2026-11-06
+## [0.2.0] - 2026-11-06
 
 ### Added / Aggiunto
-- **Career Ledger Diff Engine**: confronto semantico deterministico tra due versioni di profili (`diffProfiles`, comando CLI `careervault diff fileA fileB`), con rilevamento di ruoli aggiunti, rimossi o modificati, spostamenti temporali, aggiunte/rimozioni di competenze e variazioni metriche.
+- **Blind CV & Profile Anonymizer (`anonymizeProfile`, `careervault anonymize`, `--anonymize`)**: mascheramento automatico e reversibile dei dati identificativi (PII) e nomi aziendali per blind hiring, revisioni imparziali e screening privacy-first.
+- **Strict Validation Mode (`--strict`)**: modalità di validazione per pipeline CI/CD in cui anche i soli warning generano codice di uscita d'errore (exit 1).
+- **Unix Stdin Piping**: supporto alla lettura da standard input (`careervault validate -`, `careervault export -`) per integrazioni in pipeline unix-like.
+- **Career Ledger Diff Engine**: confronto semantico deterministico tra due versioni di profili (`diffProfiles`, comando CLI `careervault diff fileA fileB`), con tracciamento di ruoli aggiunti, rimossi o modificati, spostamenti temporali e variazioni metriche.
 - **Standalone HTML Exporter**: esportatore CV in formato HTML reattivo e autocontenuto (`--format html`) con foglio di stile ottimizzato per stampa e conversione PDF via browser (`@media print`, `@page { margin: 1.5cm }`).
 - **JSON Resume Bi-directional Interop**: funzione `importJsonResume` e comando `careervault import <resume.json>` per importare e convertire istantaneamente curriculum esistenti nel formato `career.json`.
 - **Advanced Tailoring & Export Controls**: filtri per competenze (`--filter-skills`), limite temporale (`--max-years`), limite del numero di esperienze (`--limit`) e stili di presentazione (`--style compact|detailed|standard`).
-- **Employment Gap & Senior Metric Audits**: rilevamento proattivo di buchi di carriera superiori a 3 mesi e segnalazione di ruoli senior privi di metriche aziendali quantificabili.
+- **Employment Gap & Senior Metric Audits**: rilevamento di buchi di carriera superiori a 3 mesi e verifica della presenza di metriche aziendali per ruoli senior.
 - **Stale Skill Detection**: avviso per competenze non impiegate attivamente da oltre 4 anni.
-- **Enhanced Test Suite**: espansione della suite a 23 test automatizzati a copertura completa di schema, diff, validazione, CLI ed esportatori.
+- **Expanded Test Suite**: suite a 26 test automatizzati a copertura completa di schema, diff, validazione, CLI, anonymizer ed esportatori.
 
 ## [0.1.0] - 2026-11-06
 

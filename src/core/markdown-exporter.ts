@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Manoj Rollo (MRJonam91)
 
+import { anonymizeProfile } from "./anonymizer.ts";
 import type {
   CareerProfile,
   ExportOptions,
@@ -68,9 +69,10 @@ const FLUENCY_LABELS: Record<string, { it: string; en: string }> = {
 };
 
 export function exportMarkdownCv(
-  profile: CareerProfile,
+  rawProfile: CareerProfile,
   options: ExportOptions = { lang: "en" }
 ): string {
+  const profile = options.anonymize ? anonymizeProfile(rawProfile) : rawProfile;
   const lang = options.lang;
   const isIt = lang === "it";
   const isCompact = options.style === "compact";

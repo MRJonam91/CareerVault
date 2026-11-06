@@ -9,3 +9,4 @@ export * from "./core/html-exporter.ts";
 export * from "./core/json-resume-exporter.ts";
 export * from "./core/diff.ts";
 export * from "./core/stats.ts";
+export * from "./core/anonymizer.ts";

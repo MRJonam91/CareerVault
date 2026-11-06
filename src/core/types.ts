@@ -120,6 +120,7 @@ export interface ExportOptions {
   filterSkills?: string[];
   maxYears?: number;
   limitExperiences?: number;
+  anonymize?: boolean;
 }
 
 export interface CareerDiffChange {

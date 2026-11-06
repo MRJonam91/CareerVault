@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Manoj Rollo (MRJonam91)
 
+import { anonymizeProfile } from "./anonymizer.ts";
 import type {
   CareerProfile,
   LocalizedText,
@@ -89,9 +90,10 @@ export interface JsonResume {
 }
 
 export function exportJsonResume(
-  profile: CareerProfile,
-  options: { lang: SupportedLanguage } = { lang: "en" }
+  rawProfile: CareerProfile,
+  options: { lang: SupportedLanguage; anonymize?: boolean } = { lang: "en" }
 ): JsonResume {
+  const profile = options.anonymize ? anonymizeProfile(rawProfile) : rawProfile;
   const lang = options.lang;
   const b = profile.basics;
 

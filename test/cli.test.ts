@@ -33,6 +33,7 @@ test("cli --help shows commands and usage", () => {
   assert.ok(stdout.includes("export"));
   assert.ok(stdout.includes("diff"));
   assert.ok(stdout.includes("import"));
+  assert.ok(stdout.includes("anonymize"));
 });
 
 test("cli --version prints version", () => {
@@ -85,7 +86,21 @@ test("cli init, validate, export HTML, diff, import and stats lifecycle", () => 
     assert.equal(diffRes.status, 0);
     assert.ok(diffRes.stdout.includes("Career Ledger Diff"));
 
-    // 8. stats
+    // 8. anonymize command
+    const tmpBlind = resolve("test-lifecycle-blind.json");
+    const anonRes = runCli(["anonymize", tmpFileA, "-o", tmpBlind]);
+    assert.equal(anonRes.status, 0);
+    assert.ok(existsSync(tmpBlind));
+    unlinkSync(tmpBlind);
+
+    // 9. export markdown with --anonymize
+    const blindCv = resolve("test-lifecycle-blind-cv.md");
+    const expBlindRes = runCli(["export", tmpFileA, "--anonymize", "-o", blindCv]);
+    assert.equal(expBlindRes.status, 0);
+    assert.ok(existsSync(blindCv));
+    unlinkSync(blindCv);
+
+    // 10. stats
     const statsRes = runCli(["stats", tmpFileA]);
     assert.equal(statsRes.status, 0);
     assert.ok(statsRes.stdout.includes("Career Telemetry"));

@@ -105,7 +105,14 @@ Importa e converte un curriculum in formato [JSON Resume](https://jsonresume.org
 careervault import resume.json -o career.json
 ```
 
-### 6. `careervault stats <file> [--json]`
+### 6. `careervault anonymize <file> [-o <career.blind.json>]`
+Genera una versione anonimizzata per blind-screening con dati personali e aziende mascherati:
+```bash
+careervault anonymize career.json -o career.blind.json
+careervault export career.json --anonymize --lang it -o blind-cv.md
+```
+
+### 7. `careervault stats <file> [--json]`
 Calcola la durata di carriera reale (deduplicando le sovrapposizioni temporali), la ripartizione per categoria di competenze e il livello di copertura delle evidenze:
 ```bash
 careervault stats career.json

@@ -8,12 +8,13 @@ import { validateProfile } from "../core/validator.ts";
 import { exportMarkdownCv } from "../core/markdown-exporter.ts";
 import { exportHtmlCv } from "../core/html-exporter.ts";
 import { exportJsonResume, importJsonResume } from "../core/json-resume-exporter.ts";
+import { anonymizeProfile } from "../core/anonymizer.ts";
 import { diffProfiles } from "../core/diff.ts";
 import { getCareerStats } from "../core/stats.ts";
 import { formatSponsorNotice, shouldShowSponsorNotice } from "../core/constants.ts";
 import type { CareerProfile, SupportedLanguage, CvStyle } from "../core/types.ts";
 
-const VERSION = "0.2.0-beta.1";
+const VERSION = "0.2.0";
 
 const SAMPLE_PROFILE: CareerProfile = {
   schemaVersion: "1.0.0",
@@ -225,15 +226,18 @@ COMMANDS:
   export <file>                  Export deterministic CV (Markdown, HTML, or JSON Resume)
   diff <fileA> <fileB>           Compare two career profiles and report added/modified/removed items
   import <resume.json>           Convert a JSON Resume (jsonresume.org) to CareerVault profile
+  anonymize <file>               Generate a blind-screening profile with PII redacted
   stats <file>                   Calculate career metrics, tenure, and verifiable evidence score
 
-EXPORT OPTIONS:
+OPTIONS:
   -l, --lang <it|en>             Target language for export (default: en)
   -f, --format <md|html|json-resume> Export format (default: md)
   -s, --style <standard|compact|detailed> Presentation style (default: standard)
+  --anonymize, --blind           Redact personal information & company names for blind review
   --filter-skills <skills>       Comma-separated skills to emphasize/filter
   --max-years <years>            Filter roles to recent N years
   --limit <count>                Limit number of experiences displayed
+  --strict                       Fail validation (exit code 1) on any warning or anomaly
   -o, --out <file>               Write output to file instead of stdout
   --json                         Output machine-readable JSON (for validate, stats, and diff)
   -v, --version                  Display version
@@ -251,12 +255,16 @@ EXAMPLES:
 }
 
 function loadProfile(filePath: string): CareerProfile {
-  const fullPath = resolve(process.cwd(), filePath);
-  if (!existsSync(fullPath)) {
-    console.error(`Error: File not found: ${filePath}`);
-    process.exit(1);
-  }
   try {
+    if (filePath === "-") {
+      const raw = readFileSync(process.stdin.fd, "utf8");
+      return JSON.parse(raw) as CareerProfile;
+    }
+    const fullPath = resolve(process.cwd(), filePath);
+    if (!existsSync(fullPath)) {
+      console.error(`Error: File not found: ${filePath}`);
+      process.exit(1);
+    }
     const raw = readFileSync(fullPath, "utf8");
     return JSON.parse(raw) as CareerProfile;
   } catch (err: unknown) {
@@ -304,12 +312,15 @@ export function main(): void {
     }
 
     const isJson = args.includes("--json");
+    const isStrict = args.includes("--strict");
     const profile = loadProfile(fileArg);
     const result = validateProfile(profile);
 
+    const hasFailed = !result.valid || (isStrict && result.warnings.length > 0);
+
     if (isJson) {
       console.log(JSON.stringify(result, null, 2));
-      process.exit(result.valid ? 0 : 1);
+      process.exit(hasFailed ? 1 : 0);
     }
 
     console.log(`\nAuditing career profile: ${fileArg}`);
@@ -332,17 +343,17 @@ export function main(): void {
       }
     }
 
-    if (result.valid) {
+    if (result.valid && (!isStrict || result.warnings.length === 0)) {
       console.log(`\n✅ Profile structure is valid! (0 blocking errors, ${result.warnings.length} warnings)`);
     } else {
-      console.log(`\n❌ Validation failed with ${result.errors.length} blocking error(s).`);
+      console.log(`\n❌ Validation failed: ${result.errors.length} blocking error(s)${isStrict ? `, ${result.warnings.length} warning(s) under strict mode` : ""}.`);
     }
 
     if (shouldShowSponsorNotice()) {
       console.log(formatSponsorNotice());
     }
 
-    process.exit(result.valid ? 0 : 1);
+    process.exit(hasFailed ? 1 : 0);
   }
 
   if (command === "diff") {
@@ -406,6 +417,33 @@ export function main(): void {
     return;
   }
 
+  if (command === "anonymize") {
+    const fileArg = args[1];
+    if (!fileArg || fileArg.startsWith("-")) {
+      console.error("Error: Please provide a career profile JSON file: careervault anonymize <career.json>");
+      process.exit(1);
+    }
+
+    const profile = loadProfile(fileArg);
+    const anonymized = anonymizeProfile(profile);
+
+    let outPath: string | undefined;
+    const outIdx = args.findIndex((a) => a === "-o" || a === "--out");
+    if (outIdx !== -1 && args[outIdx + 1]) {
+      outPath = resolve(process.cwd(), args[outIdx + 1]!);
+    }
+
+    const output = JSON.stringify(anonymized, null, 2) + "\n";
+    if (outPath) {
+      mkdirSync(dirname(outPath), { recursive: true });
+      writeFileSync(outPath, output, "utf8");
+      console.log(`[OK] Successfully generated anonymized blind-screening profile: ${outPath}`);
+    } else {
+      process.stdout.write(output);
+    }
+    return;
+  }
+
   if (command === "export") {
     const fileArg = args[1];
     if (!fileArg || fileArg.startsWith("-")) {
@@ -457,6 +495,8 @@ export function main(): void {
       limitExperiences = parseInt(args[limitIdx + 1]!, 10);
     }
 
+    const anonymize = args.includes("--anonymize") || args.includes("--blind");
+
     let outPath: string | undefined;
     const outIdx = args.findIndex((a) => a === "-o" || a === "--out");
     if (outIdx !== -1 && args[outIdx + 1]) {
@@ -465,11 +505,11 @@ export function main(): void {
 
     let output = "";
     if (format === "md" || format === "markdown") {
-      output = exportMarkdownCv(profile, { lang, style, filterSkills, maxYears, limitExperiences });
+      output = exportMarkdownCv(profile, { lang, style, filterSkills, maxYears, limitExperiences, anonymize });
     } else if (format === "html") {
-      output = exportHtmlCv(profile, { lang, style, filterSkills, maxYears, limitExperiences });
+      output = exportHtmlCv(profile, { lang, style, filterSkills, maxYears, limitExperiences, anonymize });
     } else if (format === "json-resume" || format === "json") {
-      output = JSON.stringify(exportJsonResume(profile, { lang }), null, 2) + "\n";
+      output = JSON.stringify(exportJsonResume(profile, { lang, anonymize }), null, 2) + "\n";
     } else {
       console.error(`Unsupported format '${format}'. Supported: md, html, json-resume`);
       process.exit(1);
