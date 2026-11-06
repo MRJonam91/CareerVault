@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file.
 Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 e rispetta il [Semantic Versioning](https://semver.org/).
 
-## [0.2.0] - 2026-11-06
+## [1.0.0] - 2026-11-06
 
 ### Added / Aggiunto
 - **Blind CV & Profile Anonymizer (`anonymizeProfile`, `careervault anonymize`, `--anonymize`)**: mascheramento automatico e reversibile dei dati identificativi (PII) e nomi aziendali per blind hiring, revisioni imparziali e screening privacy-first.

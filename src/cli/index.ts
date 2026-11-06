@@ -14,7 +14,7 @@ import { getCareerStats } from "../core/stats.ts";
 import { formatSponsorNotice, shouldShowSponsorNotice } from "../core/constants.ts";
 import type { CareerProfile, SupportedLanguage, CvStyle } from "../core/types.ts";
 
-const VERSION = "0.2.0";
+const VERSION = "1.0.0";
 
 const SAMPLE_PROFILE: CareerProfile = {
   schemaVersion: "1.0.0",

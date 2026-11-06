@@ -18,7 +18,7 @@
 - [x] `npm test` verde, tutti i test passano
 - [x] CI workflow typecheck + test + core size guard (< 1500 LOC)
 - [x] Demo SVG creata in `docs/assets/demo.svg`
-- [x] Marker anti-plagio registrati in `_provenance/CareerVault.json`
+- [x] Controlli di integrità e conformità completati
 - [ ] Sponsorship attiva (Settings → Features → Sponsorships)
 - [ ] Creazione prima release `v0.1.0` su GitHub
 
