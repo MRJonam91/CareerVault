@@ -100,7 +100,14 @@ test("cli init, validate, export HTML, diff, import and stats lifecycle", () => 
     assert.ok(existsSync(blindCv));
     unlinkSync(blindCv);
 
-    // 10. stats
+    // 10. schema export
+    const tmpSchema = resolve("test-lifecycle-schema.json");
+    const schemaRes = runCli(["schema", "-o", tmpSchema]);
+    assert.equal(schemaRes.status, 0);
+    assert.ok(existsSync(tmpSchema));
+    unlinkSync(tmpSchema);
+
+    // 11. stats
     const statsRes = runCli(["stats", tmpFileA]);
     assert.equal(statsRes.status, 0);
     assert.ok(statsRes.stdout.includes("Career Telemetry"));

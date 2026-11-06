@@ -49,9 +49,38 @@ export function exportHtmlCv(rawProfile: CareerProfile, options: ExportOptions =
     </article>`;
   }
 
+  let projHtml = "";
+  if (!options.anonymize && profile.projects?.length) {
+    projHtml = `<section class="sec"><h2>${isIt ? "Progetti Rilevanti" : "Key Projects"}</h2>` +
+      profile.projects.map((p) => `<article class="entry"><h3>${p.url ? `<a href="${esc(p.url)}">${esc(p.name)}</a>` : esc(p.name)}</h3><p class="desc">${esc(resolveText(p.description, lang))}</p>` +
+        (p.skills?.length ? `<div class="tags">${p.skills.map((s) => `<span class="tag">${esc(s)}</span>`).join("")}</div>` : "") +
+      `</article>`).join("") + `</section>`;
+  }
+
   const skillsHtml = profile.skills?.length ? `<section class="sec"><h2>${isIt ? "Competenze Tecniche" : "Technical Skills"}</h2>
     <div class="pills">${profile.skills.map((s) => `<span class="pill">${esc(s.name)}${s.level ? ` <em>(${s.level})</em>` : ""}</span>`).join("")}</div>
   </section>` : "";
+
+  let eduHtml = "";
+  if (profile.education?.length) {
+    eduHtml = `<section class="sec"><h2>${isIt ? "Formazione e Titoli" : "Education & Credentials"}</h2>` +
+      profile.education.map((e) => `<article class="entry"><h3>${esc(resolveText(e.studyType, lang))} in ${esc(resolveText(e.area, lang))} <span class="co">@ ${esc(e.institution)}</span></h3><div class="meta">${esc(e.startDate)} — ${esc(e.endDate ?? (isIt ? "Presente" : "Present"))}${e.score ? ` • ${esc(e.score)}` : ""}</div></article>`).join("") +
+      `</section>`;
+  }
+
+  let certHtml = "";
+  if (profile.certifications?.length) {
+    certHtml = `<section class="sec"><h2>${isIt ? "Certificazioni" : "Certifications"}</h2><ul class="hl">` +
+      profile.certifications.map((c) => `<li><strong>${esc(c.name)}</strong> — ${esc(c.issuer)} (${esc(c.issueDate)})${c.credentialId ? ` • ID: <code>${esc(c.credentialId)}</code>` : ""}</li>`).join("") +
+      `</ul></section>`;
+  }
+
+  let langHtml = "";
+  if (profile.languages?.length) {
+    langHtml = `<section class="sec"><h2>${isIt ? "Lingue" : "Languages"}</h2><div class="cts">` +
+      profile.languages.map((l) => `<span><strong>${esc(resolveText(l.language, lang))}:</strong> ${esc(l.fluency)}</span>`).join(" • ") +
+      `</div></section>`;
+  }
 
   return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>${esc(b.name)} — ${esc(title)}</title>
@@ -79,7 +108,11 @@ export function exportHtmlCv(rawProfile: CareerProfile, options: ExportOptions =
   <hr/>
   ${summary ? `<section class="sec"><h2>${isIt ? "Profilo" : "Summary"}</h2><p>${esc(summary)}</p></section>` : ""}
   <section class="sec"><h2>${isIt ? "Esperienza Professionale" : "Work Experience"}</h2>${expHtml}</section>
+  ${projHtml}
   ${skillsHtml}
+  ${eduHtml}
+  ${certHtml}
+  ${langHtml}
   <footer>${isIt ? "Generato tramite CareerVault — Single Source of Truth" : "Generated via CareerVault — Career Single Source of Truth"}</footer>
 </div></body></html>`;
 }

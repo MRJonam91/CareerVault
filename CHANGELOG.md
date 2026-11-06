@@ -9,6 +9,9 @@ e rispetta il [Semantic Versioning](https://semver.org/).
 ## [1.0.0] - 2026-11-06
 
 ### Added / Aggiunto
+- **JSON Schema Standard (`schema.json`, `careervault schema`)**: specifica formale Draft-07 per abilitare autocompletamento in tempo reale, convalida e tooltip informativi negli editor IDE (VS Code, Cursor, WebStorm).
+- **Comprehensive HTML Exporter**: estensione dell'esportatore HTML (`--format html`) a tutte le sezioni di profilo (formazione, certificazioni, progetti e lingue).
+- **Education & Certification Validation**: audit cronologico e formattazione date estesa anche a titoli di studio e certificazioni professionali.
 - **Blind CV & Profile Anonymizer (`anonymizeProfile`, `careervault anonymize`, `--anonymize`)**: mascheramento automatico e reversibile dei dati identificativi (PII) e nomi aziendali per blind hiring, revisioni imparziali e screening privacy-first.
 - **Strict Validation Mode (`--strict`)**: modalità di validazione per pipeline CI/CD in cui anche i soli warning generano codice di uscita d'errore (exit 1).
 - **Unix Stdin Piping**: supporto alla lettura da standard input (`careervault validate -`, `careervault export -`) per integrazioni in pipeline unix-like.

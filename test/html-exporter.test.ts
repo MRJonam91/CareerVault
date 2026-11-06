@@ -34,9 +34,43 @@ const SAMPLE_PROFILE: CareerProfile = {
       skills: ["Go", "Kubernetes"],
     },
   ],
+  education: [
+    {
+      id: "edu-1",
+      institution: "Politecnico di Torino",
+      area: { it: "Informatica", en: "Computer Science" },
+      studyType: { it: "Laurea Magistrale", en: "MSc" },
+      startDate: "2016-10",
+      endDate: "2018-10",
+    },
+  ],
+  certifications: [
+    {
+      id: "cert-1",
+      name: "AWS Solutions Architect",
+      issuer: "Amazon Web Services",
+      issueDate: "2022-05",
+      credentialId: "AWS-12345",
+    },
+  ],
+  languages: [
+    {
+      language: { it: "Italiano", en: "Italian" },
+      fluency: "native",
+    },
+  ],
+  projects: [
+    {
+      id: "proj-1",
+      name: "KubeScale",
+      description: { it: "Autoscaler per Kubernetes", en: "Autoscaler for Kubernetes" },
+      skills: ["Go", "Kubernetes"],
+      startDate: "2022-01",
+    },
+  ],
 };
 
-test("exportHtmlCv generates responsive, printable HTML with expected elements", () => {
+test("exportHtmlCv generates responsive, printable HTML with all sections", () => {
   const html = exportHtmlCv(SAMPLE_PROFILE, { lang: "it" });
   assert.ok(html.includes("<!DOCTYPE html>"));
   assert.ok(html.includes("Elena Romano"));
@@ -47,6 +81,10 @@ test("exportHtmlCv generates responsive, printable HTML with expected elements",
   assert.ok(html.includes("Torino, IT"));
   assert.ok(html.includes("Esperienza Professionale"));
   assert.ok(html.includes("Competenze Tecniche"));
+  assert.ok(html.includes("Politecnico di Torino"));
+  assert.ok(html.includes("AWS Solutions Architect"));
+  assert.ok(html.includes("KubeScale"));
+  assert.ok(html.includes("Italiano:"));
 });
 
 test("exportHtmlCv properly escapes special characters to prevent XSS", () => {

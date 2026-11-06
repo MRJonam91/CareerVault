@@ -363,6 +363,36 @@ export function validateProfile(profile: unknown): ValidationResult {
     });
   }
 
+  // Education validation
+  if (Array.isArray(p.education)) {
+    p.education.forEach((edu, idx) => {
+      const field = `education[${idx}]`;
+      if (!edu.institution) errors.push({ field: `${field}.institution`, code: "MISSING_INSTITUTION", message: "Education institution is required" });
+      if (edu.startDate && !DATE_REGEX.test(edu.startDate)) {
+        errors.push({ field: `${field}.startDate`, code: "INVALID_DATE_FORMAT", message: `Invalid education startDate '${edu.startDate}'` });
+      }
+      if (edu.endDate && !DATE_REGEX.test(edu.endDate)) {
+        errors.push({ field: `${field}.endDate`, code: "INVALID_DATE_FORMAT", message: `Invalid education endDate '${edu.endDate}'` });
+      }
+      if (edu.startDate && edu.endDate && DATE_REGEX.test(edu.startDate) && DATE_REGEX.test(edu.endDate)) {
+        if (parseDateToNumber(edu.endDate) < parseDateToNumber(edu.startDate)) {
+          errors.push({ field: `${field}.endDate`, code: "CHRONOLOGICAL_INVERSION", message: `Education at '${edu.institution}' endDate is earlier than startDate` });
+        }
+      }
+    });
+  }
+
+  // Certifications validation
+  if (Array.isArray(p.certifications)) {
+    p.certifications.forEach((c, idx) => {
+      const field = `certifications[${idx}]`;
+      if (!c.name) errors.push({ field: `${field}.name`, code: "MISSING_CERT_NAME", message: "Certification name is required" });
+      if (c.issueDate && !DATE_REGEX.test(c.issueDate)) {
+        errors.push({ field: `${field}.issueDate`, code: "INVALID_DATE_FORMAT", message: `Invalid certification issueDate '${c.issueDate}'` });
+      }
+    });
+  }
+
   // Orphan skills check
   for (const declared of skillInventory) {
     if (!referencedSkills.has(declared)) {

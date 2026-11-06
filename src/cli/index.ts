@@ -10,6 +10,7 @@ import { exportHtmlCv } from "../core/html-exporter.ts";
 import { exportJsonResume, importJsonResume } from "../core/json-resume-exporter.ts";
 import { anonymizeProfile } from "../core/anonymizer.ts";
 import { diffProfiles } from "../core/diff.ts";
+import { CAREER_VAULT_JSON_SCHEMA } from "../schema/schema.ts";
 import { getCareerStats } from "../core/stats.ts";
 import { formatSponsorNotice, shouldShowSponsorNotice } from "../core/constants.ts";
 import type { CareerProfile, SupportedLanguage, CvStyle } from "../core/types.ts";
@@ -227,6 +228,7 @@ COMMANDS:
   diff <fileA> <fileB>           Compare two career profiles and report added/modified/removed items
   import <resume.json>           Convert a JSON Resume (jsonresume.org) to CareerVault profile
   anonymize <file>               Generate a blind-screening profile with PII redacted
+  schema                         Export the CareerVault JSON Schema Draft-07
   stats <file>                   Calculate career metrics, tenure, and verifiable evidence score
 
 OPTIONS:
@@ -440,6 +442,23 @@ export function main(): void {
       console.log(`[OK] Successfully generated anonymized blind-screening profile: ${outPath}`);
     } else {
       process.stdout.write(output);
+    }
+    return;
+  }
+
+  if (command === "schema") {
+    let outPath: string | undefined;
+    const outIdx = args.findIndex((a) => a === "-o" || a === "--out");
+    if (outIdx !== -1 && args[outIdx + 1]) {
+      outPath = resolve(process.cwd(), args[outIdx + 1]!);
+    }
+    const schemaOutput = JSON.stringify(CAREER_VAULT_JSON_SCHEMA, null, 2) + "\n";
+    if (outPath) {
+      mkdirSync(dirname(outPath), { recursive: true });
+      writeFileSync(outPath, schemaOutput, "utf8");
+      console.log(`[OK] Exported CareerVault JSON Schema to: ${outPath}`);
+    } else {
+      process.stdout.write(schemaOutput);
     }
     return;
   }

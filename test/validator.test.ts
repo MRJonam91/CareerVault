@@ -37,6 +37,24 @@ const BASE_VALID_PROFILE: CareerProfile = {
       evidence: ["https://example.com/proof"],
     },
   ],
+  education: [
+    {
+      id: "edu-1",
+      institution: "Università di Roma",
+      area: { it: "Informatica", en: "Computer Science" },
+      studyType: { it: "Laurea", en: "BSc" },
+      startDate: "2015-09",
+      endDate: "2018-07",
+    },
+  ],
+  certifications: [
+    {
+      id: "cert-1",
+      name: "CKA",
+      issuer: "CNCF",
+      issueDate: "2022-01",
+    },
+  ],
 };
 
 test("validator accepts a fully compliant profile", () => {
@@ -45,7 +63,7 @@ test("validator accepts a fully compliant profile", () => {
   assert.equal(result.errors.length, 0);
 });
 
-test("validator detects chronological inversion", () => {
+test("validator detects chronological inversion in experience", () => {
   const badProfile = structuredClone(BASE_VALID_PROFILE);
   badProfile.experiences[0]!.startDate = "2023-05";
   badProfile.experiences[0]!.endDate = "2021-02";
@@ -55,6 +73,29 @@ test("validator detects chronological inversion", () => {
   const chronError = result.errors.find((e) => e.code === "CHRONOLOGICAL_INVERSION");
   assert.ok(chronError);
   assert.match(chronError.message, /chronological inconsistency/i);
+});
+
+test("validator detects chronological inversion in education", () => {
+  const badEdu = structuredClone(BASE_VALID_PROFILE);
+  badEdu.education![0]!.startDate = "2020-09";
+  badEdu.education![0]!.endDate = "2018-07";
+
+  const result = validateProfile(badEdu);
+  assert.equal(result.valid, false);
+  const eduError = result.errors.find((e) => e.field.startsWith("education"));
+  assert.ok(eduError);
+  assert.equal(eduError.code, "CHRONOLOGICAL_INVERSION");
+});
+
+test("validator detects invalid certification date format", () => {
+  const badCert = structuredClone(BASE_VALID_PROFILE);
+  badCert.certifications![0]!.issueDate = "invalid-date";
+
+  const result = validateProfile(badCert);
+  assert.equal(result.valid, false);
+  const certError = result.errors.find((e) => e.field.startsWith("certifications"));
+  assert.ok(certError);
+  assert.equal(certError.code, "INVALID_DATE_FORMAT");
 });
 
 test("validator detects undeclared skills used in experience", () => {
@@ -94,7 +135,7 @@ test("validator detects employment gaps between consecutive roles", () => {
     company: "Next Corp",
     role: { it: "Sviluppatore", en: "Developer" },
     employmentType: "full-time",
-    startDate: "2024-06", // gap from 2023-01 to 2024-06 is 17 months
+    startDate: "2024-06",
     endDate: "2025-01",
     highlights: [{ it: "Progetti", en: "Projects" }],
     skills: ["TypeScript"],
@@ -116,7 +157,7 @@ test("validator alerts when senior roles lack quantifiable metrics", () => {
 
 test("validator warns about stale skills", () => {
   const profileWithStaleSkill = structuredClone(BASE_VALID_PROFILE);
-  profileWithStaleSkill.skills[0]!.lastUsed = "2018"; // >4 years ago
+  profileWithStaleSkill.skills[0]!.lastUsed = "2018";
 
   const result = validateProfile(profileWithStaleSkill);
   const staleWarn = result.warnings.find((w) => w.code === "STALE_SKILL");
